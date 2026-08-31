@@ -1,0 +1,122 @@
+[
+  {
+    "id": "1",
+    "name": "İnsülin Pompası",
+    "description": "Otomatik insülin verme sistemi ile kan şekerini kontrol eden modern cihaz",
+    "price": 4500.00,
+    "category": "İnsülin Cihazları",
+    "image": "assets/images/insulin_pump.jpg",
+    "rating": 4.8,
+    "reviews": 324,
+    "manufacturer": "MediTech Türkiye",
+    "benefits": ["Otomatik taş verme", "Hafta yönetimi", "Gürültüsüz çalışma"]
+  },
+  {
+    "id": "2",
+    "name": "Kan Şekeri Ölçer",
+    "description": "Hızlı ve doğru ölçüm yapan taşınabilir glukometr",
+    "price": 450.00,
+    "category": "Ölçüm Cihazları",
+    "image": "assets/images/glucose_meter.jpg",
+    "rating": 4.6,
+    "reviews": 512,
+    "manufacturer": "DiabetesWatch",
+    "benefits": ["5 saniyede sonuç", "Çok az kan örneği", "Hafızada 300 ölçüm"]
+  },
+  {
+    "id": "3",
+    "name": "Test Şeritleri",
+    "description": "Kan şekeri ölçer cihazı ile uyumlu test şeritleri (100 adet)",
+    "price": 250.00,
+    "category": "Tüketim Malzemeleri",
+    "image": "assets/images/test_strips.jpg",
+    "rating": 4.5,
+    "reviews": 289,
+    "manufacturer": "DiabetesWatch",
+    "benefits": ["100 adet şerit", "Hızlı sonuç", "Tam doğruluk"]
+  },
+  {
+    "id": "4",
+    "name": "Lancing Device",
+    "description": "Ağrısız ve steril kan örneği alma cihazı",
+    "price": 150.00,
+    "category": "Tüketim Malzemeleri",
+    "image": "assets/images/lancing_device.jpg",
+    "rating": 4.7,
+    "reviews": 198,
+    "manufacturer": "SafePrick",
+    "benefits": ["11 derinlik ayarı", "Ağrısız kanama", "Çok hızlı"]
+  },
+  {
+    "id": "5",
+    "name": "Diyabet Beslenme Kitabı",
+    "description": "Diyabetli hastalar için beslenme rehberi ve tarifleri içeren kapsamlı kitap",
+    "price": 85.00,
+    "category": "Eğitim Malzemeleri",
+    "image": "assets/images/nutrition_book.jpg",
+    "rating": 4.4,
+    "reviews": 156,
+    "manufacturer": "Sağlık Yayınları",
+    "benefits": ["450 sayfa", "Diyetisyen tarafından yazıldı", "Örnek menüler"]
+  },
+  {
+    "id": "6",
+    "name": "Kapalı Kan Basıncı Ölçer",
+    "description": "Dijital kan basıncı ölçer - otomatik şişme ve hassas ölçüm",
+    "price": 350.00,
+    "category": "Ölçüm Cihazları",
+    "image": "assets/images/blood_pressure.jpg",
+    "rating": 4.9,
+    "reviews": 410,
+    "manufacturer": "HealthPlus",
+    "benefits": ["Otomatik şişme", "Hafızada 60 ölçüm", "Ses uyarısı"]
+  },
+  {
+    "id": "7",
+    "name": "Diyabetik Çorap Seti",
+    "description": "Özel dokulu, kan dolaşımını iyileştiren diyabetik çorapları (3 çift)",
+    "price": 120.00,
+    "category": "Ayakkabı Ürünleri",
+    "image": "assets/images/diabetic_socks.jpg",
+    "rating": 4.3,
+    "reviews": 87,
+    "manufacturer": "ComfortFeet",
+    "benefits": ["3 çift paket", "Antibakteriyel kumaş", "Ergonomik tasarım"]
+  },
+  {
+    "id": "8",
+    "name": "İnsülin Kutusu",
+    "description": "Taşınabilir ve soğuk taşıyan insülin muhafaza kutusu",
+    "price": 280.00,
+    "category": "Saklama Ürünleri",
+    "image": "assets/images/insulin_cooler.jpg",
+    "rating": 4.6,
+    "reviews": 203,
+    "manufacturer": "CoolMed",
+    "benefits": ["8 saate kadar soğuk", "Kompakt tasarım", "USB şarjlı"]
+  },
+  {
+    "id": "9",
+    "name": "Kan Lipid Paneli Test Seti",
+    "description": "Kolesterol ve trigiseritleri ölçen tam test seti",
+    "price": 520.00,
+    "category": "Test Kitleri",
+    "image": "assets/images/lipid_panel.jpg",
+    "rating": 4.7,
+    "reviews": 134,
+    "manufacturer": "LabTech",
+    "benefits": ["Ev ortamında test", "3 sonuç türü", "Hızlı sonuç (15 dakika)"]
+  },
+  {
+    "id": "10",
+    "name": "Diyabet Yönetim Uygulaması (1 Yıllık)",
+    "description": "Mobil uygulamada kan şekeri, ilaç, egzersiz takibi ve doktor raporları",
+    "price": 199.00,
+    "category": "Yazılım",
+    "image": "assets/images/app_license.png",
+    "rating": 4.5,
+    "reviews": 267,
+    "manufacturer": "DiabetesApp Pro",
+    "benefits": ["Bulut yedekleme", "Grafik raporlar", "Doktor entegrasyonu"]
+  }
+]

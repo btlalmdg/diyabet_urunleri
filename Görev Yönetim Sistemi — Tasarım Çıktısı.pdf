@@ -1,0 +1,264 @@
+<!DOCTYPE html>
+<!-- saved from url=(0073)file:///C:/Users/ASUS%20PC/Desktop/PROJE/docs/teslim/tasarim-ciktisi.html -->
+<html lang="tr"><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+
+<title>Görev Yönetim Sistemi — Tasarım Çıktısı</title>
+<script src="./Görev Yönetim Sistemi — Tasarım Çıktısı_files/mermaid.min.js.indir"></script>
+<style>
+  @page { size: A4; margin: 20mm 16mm; }
+  body {
+    font-family: "Segoe UI", Arial, sans-serif;
+    color: #1a1a1a;
+    line-height: 1.5;
+    font-size: 13px;
+  }
+  .cover {
+    height: 90vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    page-break-after: always;
+  }
+  .cover h1 { font-size: 30px; margin-bottom: 8px; }
+  .cover h2 { font-size: 18px; font-weight: normal; color: #555; }
+  .cover .meta { margin-top: 40px; color: #777; font-size: 13px; }
+  section { page-break-before: always; }
+  section:first-of-type { page-break-before: auto; }
+  h1 { font-size: 22px; border-bottom: 2px solid #333; padding-bottom: 6px; }
+  h2 { font-size: 17px; margin-top: 28px; color: #17406b; }
+  h3 { font-size: 14px; margin-top: 18px; }
+  table { border-collapse: collapse; width: 100%; margin: 10px 0 18px; font-size: 12px; }
+  th, td { border: 1px solid #bbb; padding: 6px 8px; text-align: left; }
+  th { background: #eef2f7; }
+  code { background: #f2f2f2; padding: 1px 5px; border-radius: 3px; font-size: 12px; }
+  pre code { display: block; padding: 10px; overflow-x: auto; }
+  blockquote { border-left: 3px solid #999; margin: 10px 0; padding: 4px 12px; color: #555; background: #fafafa; }
+  .mermaid { text-align: center; margin: 16px 0; }
+  a { color: #17406b; }
+  .toc ul { line-height: 1.9; }
+</style>
+</head>
+<body>
+
+<div class="cover">
+  <h1>Görev Yönetim Sistemi</h1>
+  <h2>Tasarım Çıktısı — Aşama 1</h2>
+  <div class="meta">
+    Proje Tanıtım Dokümanı · Veri Modeli Tasarımı · API Tasarım Dokümanı<br>
+    20 Ağustos 2026
+  </div>
+</div>
+
+<div class="toc">
+  <h1>İçindekiler</h1>
+  <ul>
+    <li>1. Proje Tanıtım Dokümanı</li>
+    <li>2. Veri Modeli Tasarımı</li>
+    <li>3. API Tasarım Dokümanı</li>
+  </ul>
+</div>
+
+<section id="tanitim">
+<h1>1. Proje Tanıtım Dokümanı</h1>
+
+<h2>1.1 Amaç</h2>
+<p>Bir yazılım şirketinin ekip içi görev, proje ve çalışan sorumluluklarını takip
+edebilmesi için REST API tabanlı bir Görev Yönetim Sistemi geliştirilmiştir.</p>
+
+<h2>1.2 Kapsam</h2>
+<p>Sistem aşağıdaki temel süreçleri destekler:</p>
+<ul>
+  <li><b>Görev oluşturma:</b> Bir projeye bağlı yeni görevler tanımlanabilir.</li>
+  <li><b>Görev atama:</b> Görevler çalışanlara atanabilir, atama değiştirilebilir/kaldırılabilir.</li>
+  <li><b>Durum takibi:</b> Görevler <code>TODO → IN_PROGRESS → IN_REVIEW → DONE</code> akışında izlenir.</li>
+  <li><b>Önceliklendirme:</b> Görevlere <code>LOW / MEDIUM / HIGH / CRITICAL</code> öncelik seviyesi atanır.</li>
+  <li><b>Filtreleme:</b> Görevler durum, öncelik, proje, çalışan, gecikme ve başlık bazında filtrelenebilir.</li>
+  <li><b>Raporlama:</b> Durum/öncelik özetleri, çalışan iş yükü, proje ilerlemesi ve gecikmiş görev raporları sunulur.</li>
+</ul>
+
+<h2>1.3 Kullanıcı Rolleri (kavramsal)</h2>
+<table>
+  <tbody><tr><th>Rol</th><th>Sorumluluk</th></tr>
+  <tr><td>ADMIN</td><td>Tüm çalışan, proje ve görev verilerini yönetir.</td></tr>
+  <tr><td>MANAGER</td><td>Proje ve görev oluşturur, atama yapar, raporları izler.</td></tr>
+  <tr><td>EMPLOYEE</td><td>Kendisine atanan görevlerin durumunu günceller.</td></tr>
+</tbody></table>
+<blockquote>Not: Mevcut sürümde uç noktalar herkese açık çalışır; rol alanı veri
+modelinde tutulur ve ileride yetkilendirme (auth) katmanı bu alan üzerine inşa edilebilir.</blockquote>
+
+<h2>1.4 Teknoloji Yığını</h2>
+<ul>
+  <li><b>Çalışma zamanı:</b> Node.js</li>
+  <li><b>Dil:</b> TypeScript</li>
+  <li><b>Web çatısı:</b> Express.js</li>
+  <li><b>ORM:</b> Prisma</li>
+  <li><b>Veritabanı:</b> SQLite (dosya tabanlı, <code>prisma/dev.db</code>)</li>
+  <li><b>Doğrulama:</b> Zod</li>
+</ul>
+
+<h2>1.5 Klasör Yapısı</h2>
+<pre><code>PROJE/
+├─ prisma/
+│  ├─ schema.prisma        # Veri modeli
+│  └─ migrations/          # Migration geçmişi
+├─ src/
+│  ├─ app.ts               # Express app kurulumu ve route bağlama
+│  ├─ server.ts            # Uygulama giriş noktası
+│  ├─ prisma.ts            # PrismaClient singleton
+│  ├─ routes/              # Endpoint - controller eşlemeleri
+│  ├─ controllers/         # İş mantığı
+│  ├─ schemas/             # Zod doğrulama şemaları
+│  ├─ middlewares/         # validate, errorHandler, notFoundHandler
+│  └─ utils/               # AppError, asyncHandler
+├─ docs/                   # Bu dokümanlar
+├─ .env
+├─ package.json
+└─ tsconfig.json</code></pre>
+
+<h2>1.6 Çıktılar (Aşama 1)</h2>
+<ul>
+  <li>Proje Tanıtım Dokümanı (bu bölüm)</li>
+  <li>Veri Modeli Tasarımı</li>
+  <li>API Tasarım Dokümanı</li>
+</ul>
+</section>
+
+<section id="veri-modeli">
+<h1>2. Veri Modeli Tasarımı</h1>
+<p>Veritabanı: <b>SQLite</b> · ORM: <b>Prisma</b> (bkz. <code>prisma/schema.prisma</code>)</p>
+<blockquote>SQLite native enum tipini desteklemediği için durum/rol/öncelik alanları
+<code>String</code> olarak saklanır; izin verilen değerler API katmanında Zod şemalarıyla
+doğrulanır (bkz. <code>src/schemas</code>).</blockquote>
+
+<h2>2.1 Varlık İlişki Diyagramı (ERD)</h2>
+<div class="mermaid" data-processed="true"><svg id="mermaid-1787240928006" width="100%" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" style="max-width: 737.5999755859375px;" viewBox="0 0 737.5999755859375 582.4000244140625" role="graphics-document document" aria-roledescription="er"><style>#mermaid-1787240928006{font-family:"trebuchet ms",verdana,arial,sans-serif;font-size:16px;fill:#000000;}#mermaid-1787240928006 .error-icon{fill:#552222;}#mermaid-1787240928006 .error-text{fill:#552222;stroke:#552222;}#mermaid-1787240928006 .edge-thickness-normal{stroke-width:2px;}#mermaid-1787240928006 .edge-thickness-thick{stroke-width:3.5px;}#mermaid-1787240928006 .edge-pattern-solid{stroke-dasharray:0;}#mermaid-1787240928006 .edge-pattern-dashed{stroke-dasharray:3;}#mermaid-1787240928006 .edge-pattern-dotted{stroke-dasharray:2;}#mermaid-1787240928006 .marker{fill:#666;stroke:#666;}#mermaid-1787240928006 .marker.cross{stroke:#666;}#mermaid-1787240928006 svg{font-family:"trebuchet ms",verdana,arial,sans-serif;font-size:16px;}#mermaid-1787240928006 .entityBox{fill:#eee;stroke:#999;}#mermaid-1787240928006 .attributeBoxOdd{fill:#ffffff;stroke:#999;}#mermaid-1787240928006 .attributeBoxEven{fill:#f2f2f2;stroke:#999;}#mermaid-1787240928006 .relationshipLabelBox{fill:hsl(-160, 0%, 93.3333333333%);opacity:0.7;background-color:hsl(-160, 0%, 93.3333333333%);}#mermaid-1787240928006 .relationshipLabelBox rect{opacity:0.5;}#mermaid-1787240928006 .relationshipLine{stroke:#666;}#mermaid-1787240928006 .entityTitleText{text-anchor:middle;font-size:18px;fill:#000000;}#mermaid-1787240928006 #MD_PARENT_START{fill:#f5f5f5!important;stroke:#666!important;stroke-width:1;}#mermaid-1787240928006 #MD_PARENT_END{fill:#f5f5f5!important;stroke:#666!important;stroke-width:1;}#mermaid-1787240928006 :root{--mermaid-font-family:"trebuchet ms",verdana,arial,sans-serif;}</style><g></g><defs><marker id="MD_PARENT_START" refX="0" refY="7" markerWidth="190" markerHeight="240" orient="auto"><path d="M 18,7 L9,13 L1,7 L9,1 Z"></path></marker></defs><defs><marker id="MD_PARENT_END" refX="19" refY="7" markerWidth="20" markerHeight="28" orient="auto"><path d="M 18,7 L9,13 L1,7 L9,1 Z"></path></marker></defs><defs><marker id="ONLY_ONE_START" refX="0" refY="9" markerWidth="18" markerHeight="18" orient="auto"><path stroke="gray" fill="none" d="M9,0 L9,18 M15,0 L15,18"></path></marker></defs><defs><marker id="ONLY_ONE_END" refX="18" refY="9" markerWidth="18" markerHeight="18" orient="auto"><path stroke="gray" fill="none" d="M3,0 L3,18 M9,0 L9,18"></path></marker></defs><defs><marker id="ZERO_OR_ONE_START" refX="0" refY="9" markerWidth="30" markerHeight="18" orient="auto"><circle stroke="gray" fill="white" cx="21" cy="9" r="6"></circle><path stroke="gray" fill="none" d="M9,0 L9,18"></path></marker></defs><defs><marker id="ZERO_OR_ONE_END" refX="30" refY="9" markerWidth="30" markerHeight="18" orient="auto"><circle stroke="gray" fill="white" cx="9" cy="9" r="6"></circle><path stroke="gray" fill="none" d="M21,0 L21,18"></path></marker></defs><defs><marker id="ONE_OR_MORE_START" refX="18" refY="18" markerWidth="45" markerHeight="36" orient="auto"><path stroke="gray" fill="none" d="M0,18 Q 18,0 36,18 Q 18,36 0,18 M42,9 L42,27"></path></marker></defs><defs><marker id="ONE_OR_MORE_END" refX="27" refY="18" markerWidth="45" markerHeight="36" orient="auto"><path stroke="gray" fill="none" d="M3,9 L3,27 M9,18 Q27,0 45,18 Q27,36 9,18"></path></marker></defs><defs><marker id="ZERO_OR_MORE_START" refX="18" refY="18" markerWidth="57" markerHeight="36" orient="auto"><circle stroke="gray" fill="white" cx="48" cy="18" r="6"></circle><path stroke="gray" fill="none" d="M0,18 Q18,0 36,18 Q18,36 0,18"></path></marker></defs><defs><marker id="ZERO_OR_MORE_END" refX="39" refY="18" markerWidth="57" markerHeight="36" orient="auto"><circle stroke="gray" fill="white" cx="9" cy="18" r="6"></circle><path stroke="gray" fill="none" d="M21,18 Q39,0 57,18 Q39,36 21,18"></path></marker></defs><path class="er relationshipLine" d="M166,192.4L166,200.733C166,209.067,166,225.733,174.982,242.4C183.964,259.067,201.928,275.733,210.91,284.067L219.892,292.4" marker-end="url(#ZERO_OR_MORE_END)" marker-start="url(#ONLY_ONE_START)" style="stroke: gray; fill: none;"></path><path class="er relationshipLine" d="M564.8,192.4L564.8,200.733C564.8,209.067,564.8,225.733,555.818,242.4C546.836,259.067,528.872,275.733,519.89,284.067L510.908,292.4" marker-end="url(#ZERO_OR_MORE_END)" marker-start="url(#ONLY_ONE_START)" style="stroke: gray; fill: none;"></path><g id="entity-EMPLOYEE-fcaaba41-0847-5740-91ce-65189257a19b" transform="translate(20,20 )"><rect class="er entityBox" x="0" y="0" width="292.00000762939453" height="172.40000343322754"></rect><text class="er entityLabel" id="text-entity-EMPLOYEE-fcaaba41-0847-5740-91ce-65189257a19b" x="0" y="0" transform="translate(146.00000381469727,13)" style="dominant-baseline: middle; text-anchor: middle; font-size: 12px;">EMPLOYEE</text><rect class="er attributeBoxOdd" x="0" y="26" width="52.400001525878906" height="24.40000057220459"></rect><text class="er entityLabel" id="text-entity-EMPLOYEE-fcaaba41-0847-5740-91ce-65189257a19b-attr-1-type" x="0" y="0" transform="translate(5,38.200000286102295)" style="dominant-baseline: middle; font-size: 10.2px;">int</text><rect class="er attributeBoxOdd" x="52.400001525878906" y="26" width="58" height="24.40000057220459"></rect><text class="er entityLabel" id="text-entity-EMPLOYEE-fcaaba41-0847-5740-91ce-65189257a19b-attr-1-name" x="0" y="0" transform="translate(57.400001525878906,38.200000286102295)" style="dominant-baseline: middle; font-size: 10.2px;">id</text><rect class="er attributeBoxOdd" x="110.4000015258789" y="26" width="22" height="24.40000057220459"></rect><text class="er entityLabel" id="text-entity-EMPLOYEE-fcaaba41-0847-5740-91ce-65189257a19b-attr-1-key" x="0" y="0" transform="translate(115.4000015258789,38.200000286102295)" style="dominant-baseline: middle; font-size: 10.2px;">PK</text><rect class="er attributeBoxOdd" x="132.4000015258789" y="26" width="159.60000610351562" height="24.40000057220459"></rect><text class="er entityLabel" id="text-entity-EMPLOYEE-fcaaba41-0847-5740-91ce-65189257a19b-attr-1-comment" x="0" y="0" transform="translate(137.4000015258789,38.200000286102295)" style="dominant-baseline: middle; font-size: 10.2px;"></text><rect class="er attributeBoxEven" x="0" y="50.40000057220459" width="52.400001525878906" height="24.40000057220459"></rect><text class="er entityLabel" id="text-entity-EMPLOYEE-fcaaba41-0847-5740-91ce-65189257a19b-attr-2-type" x="0" y="0" transform="translate(5,62.600000858306885)" style="dominant-baseline: middle; font-size: 10.2px;">string</text><rect class="er attributeBoxEven" x="52.400001525878906" y="50.40000057220459" width="58" height="24.40000057220459"></rect><text class="er entityLabel" id="text-entity-EMPLOYEE-fcaaba41-0847-5740-91ce-65189257a19b-attr-2-name" x="0" y="0" transform="translate(57.400001525878906,62.600000858306885)" style="dominant-baseline: middle; font-size: 10.2px;">name</text><rect class="er attributeBoxEven" x="110.4000015258789" y="50.40000057220459" width="22" height="24.40000057220459"></rect><text class="er entityLabel" id="text-entity-EMPLOYEE-fcaaba41-0847-5740-91ce-65189257a19b-attr-2-key" x="0" y="0" transform="translate(115.4000015258789,62.600000858306885)" style="dominant-baseline: middle; font-size: 10.2px;"></text><rect class="er attributeBoxEven" x="132.4000015258789" y="50.40000057220459" width="159.60000610351562" height="24.40000057220459"></rect><text class="er entityLabel" id="text-entity-EMPLOYEE-fcaaba41-0847-5740-91ce-65189257a19b-attr-2-comment" x="0" y="0" transform="translate(137.4000015258789,62.600000858306885)" style="dominant-baseline: middle; font-size: 10.2px;"></text><rect class="er attributeBoxOdd" x="0" y="74.80000114440918" width="52.400001525878906" height="24.40000057220459"></rect><text class="er entityLabel" id="text-entity-EMPLOYEE-fcaaba41-0847-5740-91ce-65189257a19b-attr-3-type" x="0" y="0" transform="translate(5,87.00000143051147)" style="dominant-baseline: middle; font-size: 10.2px;">string</text><rect class="er attributeBoxOdd" x="52.400001525878906" y="74.80000114440918" width="58" height="24.40000057220459"></rect><text class="er entityLabel" id="text-entity-EMPLOYEE-fcaaba41-0847-5740-91ce-65189257a19b-attr-3-name" x="0" y="0" transform="translate(57.400001525878906,87.00000143051147)" style="dominant-baseline: middle; font-size: 10.2px;">email</text><rect class="er attributeBoxOdd" x="110.4000015258789" y="74.80000114440918" width="22" height="24.40000057220459"></rect><text class="er entityLabel" id="text-entity-EMPLOYEE-fcaaba41-0847-5740-91ce-65189257a19b-attr-3-key" x="0" y="0" transform="translate(115.4000015258789,87.00000143051147)" style="dominant-baseline: middle; font-size: 10.2px;">UK</text><rect class="er attributeBoxOdd" x="132.4000015258789" y="74.80000114440918" width="159.60000610351562" height="24.40000057220459"></rect><text class="er entityLabel" id="text-entity-EMPLOYEE-fcaaba41-0847-5740-91ce-65189257a19b-attr-3-comment" x="0" y="0" transform="translate(137.4000015258789,87.00000143051147)" style="dominant-baseline: middle; font-size: 10.2px;"></text><rect class="er attributeBoxEven" x="0" y="99.20000171661377" width="52.400001525878906" height="24.40000057220459"></rect><text class="er entityLabel" id="text-entity-EMPLOYEE-fcaaba41-0847-5740-91ce-65189257a19b-attr-4-type" x="0" y="0" transform="translate(5,111.40000200271606)" style="dominant-baseline: middle; font-size: 10.2px;">string</text><rect class="er attributeBoxEven" x="52.400001525878906" y="99.20000171661377" width="58" height="24.40000057220459"></rect><text class="er entityLabel" id="text-entity-EMPLOYEE-fcaaba41-0847-5740-91ce-65189257a19b-attr-4-name" x="0" y="0" transform="translate(57.400001525878906,111.40000200271606)" style="dominant-baseline: middle; font-size: 10.2px;">role</text><rect class="er attributeBoxEven" x="110.4000015258789" y="99.20000171661377" width="22" height="24.40000057220459"></rect><text class="er entityLabel" id="text-entity-EMPLOYEE-fcaaba41-0847-5740-91ce-65189257a19b-attr-4-key" x="0" y="0" transform="translate(115.4000015258789,111.40000200271606)" style="dominant-baseline: middle; font-size: 10.2px;"></text><rect class="er attributeBoxEven" x="132.4000015258789" y="99.20000171661377" width="159.60000610351562" height="24.40000057220459"></rect><text class="er entityLabel" id="text-entity-EMPLOYEE-fcaaba41-0847-5740-91ce-65189257a19b-attr-4-comment" x="0" y="0" transform="translate(137.4000015258789,111.40000200271606)" style="dominant-baseline: middle; font-size: 10.2px;">ADMIN | MANAGER | EMPLOYEE</text><rect class="er attributeBoxOdd" x="0" y="123.60000228881836" width="52.400001525878906" height="24.40000057220459"></rect><text class="er entityLabel" id="text-entity-EMPLOYEE-fcaaba41-0847-5740-91ce-65189257a19b-attr-5-type" x="0" y="0" transform="translate(5,135.80000257492065)" style="dominant-baseline: middle; font-size: 10.2px;">datetime</text><rect class="er attributeBoxOdd" x="52.400001525878906" y="123.60000228881836" width="58" height="24.40000057220459"></rect><text class="er entityLabel" id="text-entity-EMPLOYEE-fcaaba41-0847-5740-91ce-65189257a19b-attr-5-name" x="0" y="0" transform="translate(57.400001525878906,135.80000257492065)" style="dominant-baseline: middle; font-size: 10.2px;">createdAt</text><rect class="er attributeBoxOdd" x="110.4000015258789" y="123.60000228881836" width="22" height="24.40000057220459"></rect><text class="er entityLabel" id="text-entity-EMPLOYEE-fcaaba41-0847-5740-91ce-65189257a19b-attr-5-key" x="0" y="0" transform="translate(115.4000015258789,135.80000257492065)" style="dominant-baseline: middle; font-size: 10.2px;"></text><rect class="er attributeBoxOdd" x="132.4000015258789" y="123.60000228881836" width="159.60000610351562" height="24.40000057220459"></rect><text class="er entityLabel" id="text-entity-EMPLOYEE-fcaaba41-0847-5740-91ce-65189257a19b-attr-5-comment" x="0" y="0" transform="translate(137.4000015258789,135.80000257492065)" style="dominant-baseline: middle; font-size: 10.2px;"></text><rect class="er attributeBoxEven" x="0" y="148.00000286102295" width="52.400001525878906" height="24.40000057220459"></rect><text class="er entityLabel" id="text-entity-EMPLOYEE-fcaaba41-0847-5740-91ce-65189257a19b-attr-6-type" x="0" y="0" transform="translate(5,160.20000314712524)" style="dominant-baseline: middle; font-size: 10.2px;">datetime</text><rect class="er attributeBoxEven" x="52.400001525878906" y="148.00000286102295" width="58" height="24.40000057220459"></rect><text class="er entityLabel" id="text-entity-EMPLOYEE-fcaaba41-0847-5740-91ce-65189257a19b-attr-6-name" x="0" y="0" transform="translate(57.400001525878906,160.20000314712524)" style="dominant-baseline: middle; font-size: 10.2px;">updatedAt</text><rect class="er attributeBoxEven" x="110.4000015258789" y="148.00000286102295" width="22" height="24.40000057220459"></rect><text class="er entityLabel" id="text-entity-EMPLOYEE-fcaaba41-0847-5740-91ce-65189257a19b-attr-6-key" x="0" y="0" transform="translate(115.4000015258789,160.20000314712524)" style="dominant-baseline: middle; font-size: 10.2px;"></text><rect class="er attributeBoxEven" x="132.4000015258789" y="148.00000286102295" width="159.60000610351562" height="24.40000057220459"></rect><text class="er entityLabel" id="text-entity-EMPLOYEE-fcaaba41-0847-5740-91ce-65189257a19b-attr-6-comment" x="0" y="0" transform="translate(137.4000015258789,160.20000314712524)" style="dominant-baseline: middle; font-size: 10.2px;"></text></g><g id="entity-TASK-5f0ceeb5-8943-5386-8f04-a46640e9fb8e" transform="translate(190.5999984741211,292.3999938964844 )"><rect class="er entityBox" x="0" y="0" width="349.60000133514404" height="270.0000057220459"></rect><text class="er entityLabel" id="text-entity-TASK-5f0ceeb5-8943-5386-8f04-a46640e9fb8e" x="0" y="0" transform="translate(174.80000066757202,13)" style="dominant-baseline: middle; text-anchor: middle; font-size: 12px;">TASK</text><rect class="er attributeBoxOdd" x="0" y="26" width="52.400001525878906" height="24.40000057220459"></rect><text class="er entityLabel" id="text-entity-TASK-5f0ceeb5-8943-5386-8f04-a46640e9fb8e-attr-1-type" x="0" y="0" transform="translate(5,38.200000286102295)" style="dominant-baseline: middle; font-size: 10.2px;">int</text><rect class="er attributeBoxOdd" x="52.400001525878906" y="26" width="62" height="24.40000057220459"></rect><text class="er entityLabel" id="text-entity-TASK-5f0ceeb5-8943-5386-8f04-a46640e9fb8e-attr-1-name" x="0" y="0" transform="translate(57.400001525878906,38.200000286102295)" style="dominant-baseline: middle; font-size: 10.2px;">id</text><rect class="er attributeBoxOdd" x="114.4000015258789" y="26" width="21.199999809265137" height="24.40000057220459"></rect><text class="er entityLabel" id="text-entity-TASK-5f0ceeb5-8943-5386-8f04-a46640e9fb8e-attr-1-key" x="0" y="0" transform="translate(119.4000015258789,38.200000286102295)" style="dominant-baseline: middle; font-size: 10.2px;">PK</text><rect class="er attributeBoxOdd" x="135.60000133514404" y="26" width="214" height="24.40000057220459"></rect><text class="er entityLabel" id="text-entity-TASK-5f0ceeb5-8943-5386-8f04-a46640e9fb8e-attr-1-comment" x="0" y="0" transform="translate(140.60000133514404,38.200000286102295)" style="dominant-baseline: middle; font-size: 10.2px;"></text><rect class="er attributeBoxEven" x="0" y="50.40000057220459" width="52.400001525878906" height="24.40000057220459"></rect><text class="er entityLabel" id="text-entity-TASK-5f0ceeb5-8943-5386-8f04-a46640e9fb8e-attr-2-type" x="0" y="0" transform="translate(5,62.600000858306885)" style="dominant-baseline: middle; font-size: 10.2px;">string</text><rect class="er attributeBoxEven" x="52.400001525878906" y="50.40000057220459" width="62" height="24.40000057220459"></rect><text class="er entityLabel" id="text-entity-TASK-5f0ceeb5-8943-5386-8f04-a46640e9fb8e-attr-2-name" x="0" y="0" transform="translate(57.400001525878906,62.600000858306885)" style="dominant-baseline: middle; font-size: 10.2px;">title</text><rect class="er attributeBoxEven" x="114.4000015258789" y="50.40000057220459" width="21.199999809265137" height="24.40000057220459"></rect><text class="er entityLabel" id="text-entity-TASK-5f0ceeb5-8943-5386-8f04-a46640e9fb8e-attr-2-key" x="0" y="0" transform="translate(119.4000015258789,62.600000858306885)" style="dominant-baseline: middle; font-size: 10.2px;"></text><rect class="er attributeBoxEven" x="135.60000133514404" y="50.40000057220459" width="214" height="24.40000057220459"></rect><text class="er entityLabel" id="text-entity-TASK-5f0ceeb5-8943-5386-8f04-a46640e9fb8e-attr-2-comment" x="0" y="0" transform="translate(140.60000133514404,62.600000858306885)" style="dominant-baseline: middle; font-size: 10.2px;"></text><rect class="er attributeBoxOdd" x="0" y="74.80000114440918" width="52.400001525878906" height="24.40000057220459"></rect><text class="er entityLabel" id="text-entity-TASK-5f0ceeb5-8943-5386-8f04-a46640e9fb8e-attr-3-type" x="0" y="0" transform="translate(5,87.00000143051147)" style="dominant-baseline: middle; font-size: 10.2px;">string</text><rect class="er attributeBoxOdd" x="52.400001525878906" y="74.80000114440918" width="62" height="24.40000057220459"></rect><text class="er entityLabel" id="text-entity-TASK-5f0ceeb5-8943-5386-8f04-a46640e9fb8e-attr-3-name" x="0" y="0" transform="translate(57.400001525878906,87.00000143051147)" style="dominant-baseline: middle; font-size: 10.2px;">description</text><rect class="er attributeBoxOdd" x="114.4000015258789" y="74.80000114440918" width="21.199999809265137" height="24.40000057220459"></rect><text class="er entityLabel" id="text-entity-TASK-5f0ceeb5-8943-5386-8f04-a46640e9fb8e-attr-3-key" x="0" y="0" transform="translate(119.4000015258789,87.00000143051147)" style="dominant-baseline: middle; font-size: 10.2px;"></text><rect class="er attributeBoxOdd" x="135.60000133514404" y="74.80000114440918" width="214" height="24.40000057220459"></rect><text class="er entityLabel" id="text-entity-TASK-5f0ceeb5-8943-5386-8f04-a46640e9fb8e-attr-3-comment" x="0" y="0" transform="translate(140.60000133514404,87.00000143051147)" style="dominant-baseline: middle; font-size: 10.2px;"></text><rect class="er attributeBoxEven" x="0" y="99.20000171661377" width="52.400001525878906" height="24.40000057220459"></rect><text class="er entityLabel" id="text-entity-TASK-5f0ceeb5-8943-5386-8f04-a46640e9fb8e-attr-4-type" x="0" y="0" transform="translate(5,111.40000200271606)" style="dominant-baseline: middle; font-size: 10.2px;">string</text><rect class="er attributeBoxEven" x="52.400001525878906" y="99.20000171661377" width="62" height="24.40000057220459"></rect><text class="er entityLabel" id="text-entity-TASK-5f0ceeb5-8943-5386-8f04-a46640e9fb8e-attr-4-name" x="0" y="0" transform="translate(57.400001525878906,111.40000200271606)" style="dominant-baseline: middle; font-size: 10.2px;">status</text><rect class="er attributeBoxEven" x="114.4000015258789" y="99.20000171661377" width="21.199999809265137" height="24.40000057220459"></rect><text class="er entityLabel" id="text-entity-TASK-5f0ceeb5-8943-5386-8f04-a46640e9fb8e-attr-4-key" x="0" y="0" transform="translate(119.4000015258789,111.40000200271606)" style="dominant-baseline: middle; font-size: 10.2px;"></text><rect class="er attributeBoxEven" x="135.60000133514404" y="99.20000171661377" width="214" height="24.40000057220459"></rect><text class="er entityLabel" id="text-entity-TASK-5f0ceeb5-8943-5386-8f04-a46640e9fb8e-attr-4-comment" x="0" y="0" transform="translate(140.60000133514404,111.40000200271606)" style="dominant-baseline: middle; font-size: 10.2px;">TODO | IN_PROGRESS | IN_REVIEW | DONE</text><rect class="er attributeBoxOdd" x="0" y="123.60000228881836" width="52.400001525878906" height="24.40000057220459"></rect><text class="er entityLabel" id="text-entity-TASK-5f0ceeb5-8943-5386-8f04-a46640e9fb8e-attr-5-type" x="0" y="0" transform="translate(5,135.80000257492065)" style="dominant-baseline: middle; font-size: 10.2px;">string</text><rect class="er attributeBoxOdd" x="52.400001525878906" y="123.60000228881836" width="62" height="24.40000057220459"></rect><text class="er entityLabel" id="text-entity-TASK-5f0ceeb5-8943-5386-8f04-a46640e9fb8e-attr-5-name" x="0" y="0" transform="translate(57.400001525878906,135.80000257492065)" style="dominant-baseline: middle; font-size: 10.2px;">priority</text><rect class="er attributeBoxOdd" x="114.4000015258789" y="123.60000228881836" width="21.199999809265137" height="24.40000057220459"></rect><text class="er entityLabel" id="text-entity-TASK-5f0ceeb5-8943-5386-8f04-a46640e9fb8e-attr-5-key" x="0" y="0" transform="translate(119.4000015258789,135.80000257492065)" style="dominant-baseline: middle; font-size: 10.2px;"></text><rect class="er attributeBoxOdd" x="135.60000133514404" y="123.60000228881836" width="214" height="24.40000057220459"></rect><text class="er entityLabel" id="text-entity-TASK-5f0ceeb5-8943-5386-8f04-a46640e9fb8e-attr-5-comment" x="0" y="0" transform="translate(140.60000133514404,135.80000257492065)" style="dominant-baseline: middle; font-size: 10.2px;">LOW | MEDIUM | HIGH | CRITICAL</text><rect class="er attributeBoxEven" x="0" y="148.00000286102295" width="52.400001525878906" height="24.40000057220459"></rect><text class="er entityLabel" id="text-entity-TASK-5f0ceeb5-8943-5386-8f04-a46640e9fb8e-attr-6-type" x="0" y="0" transform="translate(5,160.20000314712524)" style="dominant-baseline: middle; font-size: 10.2px;">datetime</text><rect class="er attributeBoxEven" x="52.400001525878906" y="148.00000286102295" width="62" height="24.40000057220459"></rect><text class="er entityLabel" id="text-entity-TASK-5f0ceeb5-8943-5386-8f04-a46640e9fb8e-attr-6-name" x="0" y="0" transform="translate(57.400001525878906,160.20000314712524)" style="dominant-baseline: middle; font-size: 10.2px;">dueDate</text><rect class="er attributeBoxEven" x="114.4000015258789" y="148.00000286102295" width="21.199999809265137" height="24.40000057220459"></rect><text class="er entityLabel" id="text-entity-TASK-5f0ceeb5-8943-5386-8f04-a46640e9fb8e-attr-6-key" x="0" y="0" transform="translate(119.4000015258789,160.20000314712524)" style="dominant-baseline: middle; font-size: 10.2px;"></text><rect class="er attributeBoxEven" x="135.60000133514404" y="148.00000286102295" width="214" height="24.40000057220459"></rect><text class="er entityLabel" id="text-entity-TASK-5f0ceeb5-8943-5386-8f04-a46640e9fb8e-attr-6-comment" x="0" y="0" transform="translate(140.60000133514404,160.20000314712524)" style="dominant-baseline: middle; font-size: 10.2px;"></text><rect class="er attributeBoxOdd" x="0" y="172.40000343322754" width="52.400001525878906" height="24.40000057220459"></rect><text class="er entityLabel" id="text-entity-TASK-5f0ceeb5-8943-5386-8f04-a46640e9fb8e-attr-7-type" x="0" y="0" transform="translate(5,184.60000371932983)" style="dominant-baseline: middle; font-size: 10.2px;">int</text><rect class="er attributeBoxOdd" x="52.400001525878906" y="172.40000343322754" width="62" height="24.40000057220459"></rect><text class="er entityLabel" id="text-entity-TASK-5f0ceeb5-8943-5386-8f04-a46640e9fb8e-attr-7-name" x="0" y="0" transform="translate(57.400001525878906,184.60000371932983)" style="dominant-baseline: middle; font-size: 10.2px;">projectId</text><rect class="er attributeBoxOdd" x="114.4000015258789" y="172.40000343322754" width="21.199999809265137" height="24.40000057220459"></rect><text class="er entityLabel" id="text-entity-TASK-5f0ceeb5-8943-5386-8f04-a46640e9fb8e-attr-7-key" x="0" y="0" transform="translate(119.4000015258789,184.60000371932983)" style="dominant-baseline: middle; font-size: 10.2px;">FK</text><rect class="er attributeBoxOdd" x="135.60000133514404" y="172.40000343322754" width="214" height="24.40000057220459"></rect><text class="er entityLabel" id="text-entity-TASK-5f0ceeb5-8943-5386-8f04-a46640e9fb8e-attr-7-comment" x="0" y="0" transform="translate(140.60000133514404,184.60000371932983)" style="dominant-baseline: middle; font-size: 10.2px;"></text><rect class="er attributeBoxEven" x="0" y="196.80000400543213" width="52.400001525878906" height="24.40000057220459"></rect><text class="er entityLabel" id="text-entity-TASK-5f0ceeb5-8943-5386-8f04-a46640e9fb8e-attr-8-type" x="0" y="0" transform="translate(5,209.00000429153442)" style="dominant-baseline: middle; font-size: 10.2px;">int</text><rect class="er attributeBoxEven" x="52.400001525878906" y="196.80000400543213" width="62" height="24.40000057220459"></rect><text class="er entityLabel" id="text-entity-TASK-5f0ceeb5-8943-5386-8f04-a46640e9fb8e-attr-8-name" x="0" y="0" transform="translate(57.400001525878906,209.00000429153442)" style="dominant-baseline: middle; font-size: 10.2px;">assigneeId</text><rect class="er attributeBoxEven" x="114.4000015258789" y="196.80000400543213" width="21.199999809265137" height="24.40000057220459"></rect><text class="er entityLabel" id="text-entity-TASK-5f0ceeb5-8943-5386-8f04-a46640e9fb8e-attr-8-key" x="0" y="0" transform="translate(119.4000015258789,209.00000429153442)" style="dominant-baseline: middle; font-size: 10.2px;">FK</text><rect class="er attributeBoxEven" x="135.60000133514404" y="196.80000400543213" width="214" height="24.40000057220459"></rect><text class="er entityLabel" id="text-entity-TASK-5f0ceeb5-8943-5386-8f04-a46640e9fb8e-attr-8-comment" x="0" y="0" transform="translate(140.60000133514404,209.00000429153442)" style="dominant-baseline: middle; font-size: 10.2px;">nullable</text><rect class="er attributeBoxOdd" x="0" y="221.20000457763672" width="52.400001525878906" height="24.40000057220459"></rect><text class="er entityLabel" id="text-entity-TASK-5f0ceeb5-8943-5386-8f04-a46640e9fb8e-attr-9-type" x="0" y="0" transform="translate(5,233.400004863739)" style="dominant-baseline: middle; font-size: 10.2px;">datetime</text><rect class="er attributeBoxOdd" x="52.400001525878906" y="221.20000457763672" width="62" height="24.40000057220459"></rect><text class="er entityLabel" id="text-entity-TASK-5f0ceeb5-8943-5386-8f04-a46640e9fb8e-attr-9-name" x="0" y="0" transform="translate(57.400001525878906,233.400004863739)" style="dominant-baseline: middle; font-size: 10.2px;">createdAt</text><rect class="er attributeBoxOdd" x="114.4000015258789" y="221.20000457763672" width="21.199999809265137" height="24.40000057220459"></rect><text class="er entityLabel" id="text-entity-TASK-5f0ceeb5-8943-5386-8f04-a46640e9fb8e-attr-9-key" x="0" y="0" transform="translate(119.4000015258789,233.400004863739)" style="dominant-baseline: middle; font-size: 10.2px;"></text><rect class="er attributeBoxOdd" x="135.60000133514404" y="221.20000457763672" width="214" height="24.40000057220459"></rect><text class="er entityLabel" id="text-entity-TASK-5f0ceeb5-8943-5386-8f04-a46640e9fb8e-attr-9-comment" x="0" y="0" transform="translate(140.60000133514404,233.400004863739)" style="dominant-baseline: middle; font-size: 10.2px;"></text><rect class="er attributeBoxEven" x="0" y="245.6000051498413" width="52.400001525878906" height="24.40000057220459"></rect><text class="er entityLabel" id="text-entity-TASK-5f0ceeb5-8943-5386-8f04-a46640e9fb8e-attr-10-type" x="0" y="0" transform="translate(5,257.8000054359436)" style="dominant-baseline: middle; font-size: 10.2px;">datetime</text><rect class="er attributeBoxEven" x="52.400001525878906" y="245.6000051498413" width="62" height="24.40000057220459"></rect><text class="er entityLabel" id="text-entity-TASK-5f0ceeb5-8943-5386-8f04-a46640e9fb8e-attr-10-name" x="0" y="0" transform="translate(57.400001525878906,257.8000054359436)" style="dominant-baseline: middle; font-size: 10.2px;">updatedAt</text><rect class="er attributeBoxEven" x="114.4000015258789" y="245.6000051498413" width="21.199999809265137" height="24.40000057220459"></rect><text class="er entityLabel" id="text-entity-TASK-5f0ceeb5-8943-5386-8f04-a46640e9fb8e-attr-10-key" x="0" y="0" transform="translate(119.4000015258789,257.8000054359436)" style="dominant-baseline: middle; font-size: 10.2px;"></text><rect class="er attributeBoxEven" x="135.60000133514404" y="245.6000051498413" width="214" height="24.40000057220459"></rect><text class="er entityLabel" id="text-entity-TASK-5f0ceeb5-8943-5386-8f04-a46640e9fb8e-attr-10-comment" x="0" y="0" transform="translate(140.60000133514404,257.8000054359436)" style="dominant-baseline: middle; font-size: 10.2px;"></text></g><g id="entity-PROJECT-7694b060-3426-5f95-980b-c6c423c4d7b8" transform="translate(412,20 )"><rect class="er entityBox" x="0" y="0" width="305.60000133514404" height="172.40000343322754"></rect><text class="er entityLabel" id="text-entity-PROJECT-7694b060-3426-5f95-980b-c6c423c4d7b8" x="0" y="0" transform="translate(152.80000066757202,13)" style="dominant-baseline: middle; text-anchor: middle; font-size: 12px;">PROJECT</text><rect class="er attributeBoxOdd" x="0" y="26" width="52.400001525878906" height="24.40000057220459"></rect><text class="er entityLabel" id="text-entity-PROJECT-7694b060-3426-5f95-980b-c6c423c4d7b8-attr-1-type" x="0" y="0" transform="translate(5,38.200000286102295)" style="dominant-baseline: middle; font-size: 10.2px;">int</text><rect class="er attributeBoxOdd" x="52.400001525878906" y="26" width="62" height="24.40000057220459"></rect><text class="er entityLabel" id="text-entity-PROJECT-7694b060-3426-5f95-980b-c6c423c4d7b8-attr-1-name" x="0" y="0" transform="translate(57.400001525878906,38.200000286102295)" style="dominant-baseline: middle; font-size: 10.2px;">id</text><rect class="er attributeBoxOdd" x="114.4000015258789" y="26" width="21.199999809265137" height="24.40000057220459"></rect><text class="er entityLabel" id="text-entity-PROJECT-7694b060-3426-5f95-980b-c6c423c4d7b8-attr-1-key" x="0" y="0" transform="translate(119.4000015258789,38.200000286102295)" style="dominant-baseline: middle; font-size: 10.2px;">PK</text><rect class="er attributeBoxOdd" x="135.60000133514404" y="26" width="170" height="24.40000057220459"></rect><text class="er entityLabel" id="text-entity-PROJECT-7694b060-3426-5f95-980b-c6c423c4d7b8-attr-1-comment" x="0" y="0" transform="translate(140.60000133514404,38.200000286102295)" style="dominant-baseline: middle; font-size: 10.2px;"></text><rect class="er attributeBoxEven" x="0" y="50.40000057220459" width="52.400001525878906" height="24.40000057220459"></rect><text class="er entityLabel" id="text-entity-PROJECT-7694b060-3426-5f95-980b-c6c423c4d7b8-attr-2-type" x="0" y="0" transform="translate(5,62.600000858306885)" style="dominant-baseline: middle; font-size: 10.2px;">string</text><rect class="er attributeBoxEven" x="52.400001525878906" y="50.40000057220459" width="62" height="24.40000057220459"></rect><text class="er entityLabel" id="text-entity-PROJECT-7694b060-3426-5f95-980b-c6c423c4d7b8-attr-2-name" x="0" y="0" transform="translate(57.400001525878906,62.600000858306885)" style="dominant-baseline: middle; font-size: 10.2px;">name</text><rect class="er attributeBoxEven" x="114.4000015258789" y="50.40000057220459" width="21.199999809265137" height="24.40000057220459"></rect><text class="er entityLabel" id="text-entity-PROJECT-7694b060-3426-5f95-980b-c6c423c4d7b8-attr-2-key" x="0" y="0" transform="translate(119.4000015258789,62.600000858306885)" style="dominant-baseline: middle; font-size: 10.2px;"></text><rect class="er attributeBoxEven" x="135.60000133514404" y="50.40000057220459" width="170" height="24.40000057220459"></rect><text class="er entityLabel" id="text-entity-PROJECT-7694b060-3426-5f95-980b-c6c423c4d7b8-attr-2-comment" x="0" y="0" transform="translate(140.60000133514404,62.600000858306885)" style="dominant-baseline: middle; font-size: 10.2px;"></text><rect class="er attributeBoxOdd" x="0" y="74.80000114440918" width="52.400001525878906" height="24.40000057220459"></rect><text class="er entityLabel" id="text-entity-PROJECT-7694b060-3426-5f95-980b-c6c423c4d7b8-attr-3-type" x="0" y="0" transform="translate(5,87.00000143051147)" style="dominant-baseline: middle; font-size: 10.2px;">string</text><rect class="er attributeBoxOdd" x="52.400001525878906" y="74.80000114440918" width="62" height="24.40000057220459"></rect><text class="er entityLabel" id="text-entity-PROJECT-7694b060-3426-5f95-980b-c6c423c4d7b8-attr-3-name" x="0" y="0" transform="translate(57.400001525878906,87.00000143051147)" style="dominant-baseline: middle; font-size: 10.2px;">description</text><rect class="er attributeBoxOdd" x="114.4000015258789" y="74.80000114440918" width="21.199999809265137" height="24.40000057220459"></rect><text class="er entityLabel" id="text-entity-PROJECT-7694b060-3426-5f95-980b-c6c423c4d7b8-attr-3-key" x="0" y="0" transform="translate(119.4000015258789,87.00000143051147)" style="dominant-baseline: middle; font-size: 10.2px;"></text><rect class="er attributeBoxOdd" x="135.60000133514404" y="74.80000114440918" width="170" height="24.40000057220459"></rect><text class="er entityLabel" id="text-entity-PROJECT-7694b060-3426-5f95-980b-c6c423c4d7b8-attr-3-comment" x="0" y="0" transform="translate(140.60000133514404,87.00000143051147)" style="dominant-baseline: middle; font-size: 10.2px;"></text><rect class="er attributeBoxEven" x="0" y="99.20000171661377" width="52.400001525878906" height="24.40000057220459"></rect><text class="er entityLabel" id="text-entity-PROJECT-7694b060-3426-5f95-980b-c6c423c4d7b8-attr-4-type" x="0" y="0" transform="translate(5,111.40000200271606)" style="dominant-baseline: middle; font-size: 10.2px;">string</text><rect class="er attributeBoxEven" x="52.400001525878906" y="99.20000171661377" width="62" height="24.40000057220459"></rect><text class="er entityLabel" id="text-entity-PROJECT-7694b060-3426-5f95-980b-c6c423c4d7b8-attr-4-name" x="0" y="0" transform="translate(57.400001525878906,111.40000200271606)" style="dominant-baseline: middle; font-size: 10.2px;">status</text><rect class="er attributeBoxEven" x="114.4000015258789" y="99.20000171661377" width="21.199999809265137" height="24.40000057220459"></rect><text class="er entityLabel" id="text-entity-PROJECT-7694b060-3426-5f95-980b-c6c423c4d7b8-attr-4-key" x="0" y="0" transform="translate(119.4000015258789,111.40000200271606)" style="dominant-baseline: middle; font-size: 10.2px;"></text><rect class="er attributeBoxEven" x="135.60000133514404" y="99.20000171661377" width="170" height="24.40000057220459"></rect><text class="er entityLabel" id="text-entity-PROJECT-7694b060-3426-5f95-980b-c6c423c4d7b8-attr-4-comment" x="0" y="0" transform="translate(140.60000133514404,111.40000200271606)" style="dominant-baseline: middle; font-size: 10.2px;">ACTIVE | ON_HOLD | COMPLETED</text><rect class="er attributeBoxOdd" x="0" y="123.60000228881836" width="52.400001525878906" height="24.40000057220459"></rect><text class="er entityLabel" id="text-entity-PROJECT-7694b060-3426-5f95-980b-c6c423c4d7b8-attr-5-type" x="0" y="0" transform="translate(5,135.80000257492065)" style="dominant-baseline: middle; font-size: 10.2px;">datetime</text><rect class="er attributeBoxOdd" x="52.400001525878906" y="123.60000228881836" width="62" height="24.40000057220459"></rect><text class="er entityLabel" id="text-entity-PROJECT-7694b060-3426-5f95-980b-c6c423c4d7b8-attr-5-name" x="0" y="0" transform="translate(57.400001525878906,135.80000257492065)" style="dominant-baseline: middle; font-size: 10.2px;">createdAt</text><rect class="er attributeBoxOdd" x="114.4000015258789" y="123.60000228881836" width="21.199999809265137" height="24.40000057220459"></rect><text class="er entityLabel" id="text-entity-PROJECT-7694b060-3426-5f95-980b-c6c423c4d7b8-attr-5-key" x="0" y="0" transform="translate(119.4000015258789,135.80000257492065)" style="dominant-baseline: middle; font-size: 10.2px;"></text><rect class="er attributeBoxOdd" x="135.60000133514404" y="123.60000228881836" width="170" height="24.40000057220459"></rect><text class="er entityLabel" id="text-entity-PROJECT-7694b060-3426-5f95-980b-c6c423c4d7b8-attr-5-comment" x="0" y="0" transform="translate(140.60000133514404,135.80000257492065)" style="dominant-baseline: middle; font-size: 10.2px;"></text><rect class="er attributeBoxEven" x="0" y="148.00000286102295" width="52.400001525878906" height="24.40000057220459"></rect><text class="er entityLabel" id="text-entity-PROJECT-7694b060-3426-5f95-980b-c6c423c4d7b8-attr-6-type" x="0" y="0" transform="translate(5,160.20000314712524)" style="dominant-baseline: middle; font-size: 10.2px;">datetime</text><rect class="er attributeBoxEven" x="52.400001525878906" y="148.00000286102295" width="62" height="24.40000057220459"></rect><text class="er entityLabel" id="text-entity-PROJECT-7694b060-3426-5f95-980b-c6c423c4d7b8-attr-6-name" x="0" y="0" transform="translate(57.400001525878906,160.20000314712524)" style="dominant-baseline: middle; font-size: 10.2px;">updatedAt</text><rect class="er attributeBoxEven" x="114.4000015258789" y="148.00000286102295" width="21.199999809265137" height="24.40000057220459"></rect><text class="er entityLabel" id="text-entity-PROJECT-7694b060-3426-5f95-980b-c6c423c4d7b8-attr-6-key" x="0" y="0" transform="translate(119.4000015258789,160.20000314712524)" style="dominant-baseline: middle; font-size: 10.2px;"></text><rect class="er attributeBoxEven" x="135.60000133514404" y="148.00000286102295" width="170" height="24.40000057220459"></rect><text class="er entityLabel" id="text-entity-PROJECT-7694b060-3426-5f95-980b-c6c423c4d7b8-attr-6-comment" x="0" y="0" transform="translate(140.60000133514404,160.20000314712524)" style="dominant-baseline: middle; font-size: 10.2px;"></text></g><rect class="er relationshipLabelBox" x="133.95583724975586" y="241.26190185546875" width="90.4000015258789" height="16"></rect><text class="er relationshipLabel" id="rel1" x="179.1558380126953" y="249.26190185546875" style="text-anchor: middle; dominant-baseline: middle; font-size: 12px;">atanır (assignee)</text><rect class="er relationshipLabelBox" x="537.6441650390625" y="241.26190185546875" width="28" height="16"></rect><text class="er relationshipLabel" id="rel2" x="551.6441650390625" y="249.26190185546875" style="text-anchor: middle; dominant-baseline: middle; font-size: 12px;">içerir</text></svg></div>
+
+<h2>2.2 Varlık Açıklamaları</h2>
+
+<h3>Employee (Çalışan)</h3>
+<table>
+  <tbody><tr><th>Alan</th><th>Tip</th><th>Açıklama</th></tr>
+  <tr><td>id</td><td>Int</td><td>Birincil anahtar</td></tr>
+  <tr><td>name</td><td>String</td><td>Ad soyad</td></tr>
+  <tr><td>email</td><td>String</td><td>Benzersiz e-posta</td></tr>
+  <tr><td>role</td><td>String</td><td>ADMIN / MANAGER / EMPLOYEE (varsayılan: EMPLOYEE)</td></tr>
+  <tr><td>tasks</td><td>Task[]</td><td>Çalışana atanan görevler (1-N)</td></tr>
+</tbody></table>
+
+<h3>Project (Proje)</h3>
+<table>
+  <tbody><tr><th>Alan</th><th>Tip</th><th>Açıklama</th></tr>
+  <tr><td>id</td><td>Int</td><td>Birincil anahtar</td></tr>
+  <tr><td>name</td><td>String</td><td>Proje adı</td></tr>
+  <tr><td>description</td><td>String?</td><td>Açıklama (opsiyonel)</td></tr>
+  <tr><td>status</td><td>String</td><td>ACTIVE / ON_HOLD / COMPLETED (varsayılan: ACTIVE)</td></tr>
+  <tr><td>tasks</td><td>Task[]</td><td>Projeye ait görevler (1-N)</td></tr>
+</tbody></table>
+
+<h3>Task (Görev)</h3>
+<table>
+  <tbody><tr><th>Alan</th><th>Tip</th><th>Açıklama</th></tr>
+  <tr><td>id</td><td>Int</td><td>Birincil anahtar</td></tr>
+  <tr><td>title</td><td>String</td><td>Görev başlığı</td></tr>
+  <tr><td>description</td><td>String?</td><td>Açıklama (opsiyonel)</td></tr>
+  <tr><td>status</td><td>String</td><td>TODO / IN_PROGRESS / IN_REVIEW / DONE (varsayılan: TODO)</td></tr>
+  <tr><td>priority</td><td>String</td><td>LOW / MEDIUM / HIGH / CRITICAL (varsayılan: MEDIUM)</td></tr>
+  <tr><td>dueDate</td><td>DateTime?</td><td>Bitiş tarihi (opsiyonel, gecikme kontrolü için kullanılır)</td></tr>
+  <tr><td>projectId</td><td>Int (FK)</td><td>Bağlı olduğu proje (zorunlu)</td></tr>
+  <tr><td>assigneeId</td><td>Int? (FK)</td><td>Atandığı çalışan (opsiyonel, atanmamış olabilir)</td></tr>
+</tbody></table>
+
+<h2>2.3 İlişkiler</h2>
+<ul>
+  <li>Bir <b>Project</b>, sıfır veya daha fazla <b>Task</b> içerir (1-N, zorunlu FK).</li>
+  <li>Bir <b>Employee</b>, sıfır veya daha fazla <b>Task</b>'a atanabilir (1-N, opsiyonel FK).</li>
+  <li>Bir <b>Task</b> her zaman tam olarak bir projeye bağlıdır; en fazla bir çalışana atanabilir.</li>
+</ul>
+</section>
+
+<section id="api-tasarim">
+<h1>3. API Tasarım Dokümanı</h1>
+<p>Base URL: <code>http://localhost:3000/api</code><br>
+Veri formatı: <code>application/json</code></p>
+
+<p>Genel hata formatı:</p>
+<pre><code>{ "error": "ValidationError", "message": "...", "details": { } }</code></pre>
+
+<h2>Health</h2>
+<table>
+  <tbody><tr><th>Method</th><th>Endpoint</th><th>Açıklama</th></tr>
+  <tr><td>GET</td><td><code>/health</code></td><td>Servis ayakta mı kontrolü</td></tr>
+</tbody></table>
+
+<h2>Employees (Çalışanlar)</h2>
+<table>
+  <tbody><tr><th>Method</th><th>Endpoint</th><th>Açıklama</th><th>Body</th></tr>
+  <tr><td>GET</td><td><code>/employees</code></td><td>Tüm çalışanları listeler</td><td>-</td></tr>
+  <tr><td>GET</td><td><code>/employees/:id</code></td><td>Çalışan detayını (atanan görevlerle) getirir</td><td>-</td></tr>
+  <tr><td>POST</td><td><code>/employees</code></td><td>Yeni çalışan oluşturur</td><td><code>{ name, email, role? }</code></td></tr>
+  <tr><td>PUT</td><td><code>/employees/:id</code></td><td>Çalışan bilgilerini günceller</td><td><code>{ name?, email?, role? }</code></td></tr>
+  <tr><td>DELETE</td><td><code>/employees/:id</code></td><td>Çalışanı siler</td><td>-</td></tr>
+</tbody></table>
+
+<h2>Projects (Projeler)</h2>
+<table>
+  <tbody><tr><th>Method</th><th>Endpoint</th><th>Açıklama</th><th>Body</th></tr>
+  <tr><td>GET</td><td><code>/projects</code></td><td>Tüm projeleri (görev sayısıyla) listeler</td><td>-</td></tr>
+  <tr><td>GET</td><td><code>/projects/:id</code></td><td>Proje detayını (görevlerle) getirir</td><td>-</td></tr>
+  <tr><td>POST</td><td><code>/projects</code></td><td>Yeni proje oluşturur</td><td><code>{ name, description?, status? }</code></td></tr>
+  <tr><td>PUT</td><td><code>/projects/:id</code></td><td>Proje bilgilerini günceller</td><td><code>{ name?, description?, status? }</code></td></tr>
+  <tr><td>DELETE</td><td><code>/projects/:id</code></td><td>Projeyi siler</td><td>-</td></tr>
+</tbody></table>
+
+<h2>Tasks (Görevler)</h2>
+<table>
+  <tbody><tr><th>Method</th><th>Endpoint</th><th>Açıklama</th><th>Body / Query</th></tr>
+  <tr><td>GET</td><td><code>/tasks</code></td><td>Görevleri listeler, filtreleme destekler</td><td>Query: <code>status, priority, projectId, assigneeId, overdue, search</code></td></tr>
+  <tr><td>GET</td><td><code>/tasks/:id</code></td><td>Görev detayını getirir</td><td>-</td></tr>
+  <tr><td>POST</td><td><code>/tasks</code></td><td>Yeni görev oluşturur</td><td><code>{ title, description?, status?, priority?, dueDate?, projectId, assigneeId? }</code></td></tr>
+  <tr><td>PUT</td><td><code>/tasks/:id</code></td><td>Görevi günceller (genel)</td><td>Yukarıdaki alanların herhangi bir kombinasyonu</td></tr>
+  <tr><td>PATCH</td><td><code>/tasks/:id/assign</code></td><td>Görevi bir çalışana atar / atamayı kaldırır</td><td><code>{ assigneeId: number | null }</code></td></tr>
+  <tr><td>PATCH</td><td><code>/tasks/:id/status</code></td><td>Görev durumunu günceller</td><td><code>{ status }</code></td></tr>
+  <tr><td>PATCH</td><td><code>/tasks/:id/priority</code></td><td>Görev önceliğini günceller</td><td><code>{ priority }</code></td></tr>
+  <tr><td>DELETE</td><td><code>/tasks/:id</code></td><td>Görevi siler</td><td>-</td></tr>
+</tbody></table>
+
+<h3>Filtreleme Örnekleri</h3>
+<ul>
+  <li><code>GET /tasks?status=IN_PROGRESS</code></li>
+  <li><code>GET /tasks?priority=HIGH&amp;projectId=1</code></li>
+  <li><code>GET /tasks?assigneeId=3</code></li>
+  <li><code>GET /tasks?overdue=true</code> → bitiş tarihi geçmiş ve <code>DONE</code> olmayan görevler</li>
+  <li><code>GET /tasks?search=doküman</code> → başlığa göre serbest metin arama</li>
+</ul>
+
+<h2>Reports (Raporlama)</h2>
+<table>
+  <tbody><tr><th>Method</th><th>Endpoint</th><th>Açıklama</th></tr>
+  <tr><td>GET</td><td><code>/reports/status-summary</code></td><td>Durumlara göre görev sayıları</td></tr>
+  <tr><td>GET</td><td><code>/reports/priority-summary</code></td><td>Önceliklere göre görev sayıları</td></tr>
+  <tr><td>GET</td><td><code>/reports/employee-workload</code></td><td>Çalışan başına görev sayısı ve durum kırılımı</td></tr>
+  <tr><td>GET</td><td><code>/reports/project-progress</code></td><td>Proje başına tamamlanma oranı ve durum kırılımı</td></tr>
+  <tr><td>GET</td><td><code>/reports/overdue</code></td><td>Bitiş tarihi geçmiş, tamamlanmamış görevler</td></tr>
+</tbody></table>
+
+<h2>HTTP Durum Kodları</h2>
+<table>
+  <tbody><tr><th>Kod</th><th>Anlamı</th></tr>
+  <tr><td>200</td><td>Başarılı (GET/PUT/PATCH)</td></tr>
+  <tr><td>201</td><td>Oluşturuldu (POST)</td></tr>
+  <tr><td>204</td><td>İçerik yok (DELETE)</td></tr>
+  <tr><td>400</td><td>Doğrulama hatası (ValidationError)</td></tr>
+  <tr><td>404</td><td>Kayıt bulunamadı (NotFound / AppError)</td></tr>
+  <tr><td>500</td><td>Beklenmeyen sunucu hatası</td></tr>
+</tbody></table>
+</section>
+
+<script>
+  mermaid.initialize({ startOnLoad: true, theme: "neutral", er: { fontSize: 12 } });
+</script>
+
+
+</body></html>
